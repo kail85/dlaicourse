@@ -2,18 +2,25 @@
 <head></head>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
     <script lang="js">
+        
+        // called at the end, the closing bracket is also at the end
         async function run(){
+            
             const csvUrl = 'iris.csv';
-            const trainingData = tf.data.csv(csvUrl, {
+            const trainingData = tf.data.csv( // how can I get into trainingData???
+                csvUrl, {
                 columnConfigs: {
                     species: {
                         isLabel: true
                     }
                 }
-            });
+            }
+            );
             
             const numOfFeatures = (await trainingData.columnNames()).length - 1;
-            const numOfSamples = 150;
+            const numOfSamples = 150; // hard coded number of samples
+
+            // Convert features to array and label to one-hot-coding
             const convertedData =
                   trainingData.map(({xs, ys}) => {
                       const labels = [
@@ -26,10 +33,11 @@
             
             const model = tf.sequential();
             model.add(tf.layers.dense({inputShape: [numOfFeatures], activation: "sigmoid", units: 5}))
-            model.add(tf.layers.dense({activation: "softmax", units: 3}));
+            model.add(tf.layers.dense({activation: "softmax", units: 3})); // output
             
             model.compile({loss: "categoricalCrossentropy", optimizer: tf.train.adam(0.06)});
             
+            // Must use 'await' otherwise the next line will be executed immediately
             await model.fitDataset(convertedData, 
                              {epochs:100,
                               callbacks:{

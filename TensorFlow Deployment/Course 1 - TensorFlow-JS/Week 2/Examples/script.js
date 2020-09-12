@@ -21,7 +21,7 @@ function getModel() {
 }
 
 async function train(model, data) {
-	const metrics = ['loss', 'val_loss', 'accuracy', 'val_accuracy'];
+	const metrics = ['loss', 'val_loss', 'acc', 'val_acc'];
 	const container = { name: 'Model Training', styles: { height: '640px' } };
 	const fitCallbacks = tfvis.show.fitCallbacks(container, metrics);
   
@@ -69,7 +69,7 @@ function draw(e) {
 	setPosition(e);
 	ctx.lineTo(pos.x, pos.y);
 	ctx.stroke();
-	rawImage.src = canvas.toDataURL('image/png');
+	rawImage.src = canvas.toDataURL('image/png'); // copy drawing to rawImage, as well as saving as png
 }
     
 function erase() {
@@ -78,9 +78,9 @@ function erase() {
 }
     
 function save() {
-	var raw = tf.browser.fromPixels(rawImage,1);
+	var raw = tf.browser.fromPixels(rawImage,1); // 1 = single channel
 	var resized = tf.image.resizeBilinear(raw, [28,28]);
-	var tensor = resized.expandDims(0);
+	var tensor = resized.expandDims(0); // tensor needs to be 4D, so expand 3D to 4D by adding a dimension of number of images [numImage, rows, cols, channels]
     var prediction = model.predict(tensor);
     var pIndex = tf.argMax(prediction, 1).dataSync();
     
@@ -104,15 +104,17 @@ function init() {
 
 
 async function run() {  
-	const data = new MnistData();
+	const data = new MnistData(); // in data.js
 	await data.load();
 	const model = getModel();
-	tfvis.show.modelSummary({name: 'Model Architecture'}, model);
+	tfvis.show.modelSummary({name: 'Model Architecture'}, model); // show model structure
 	await train(model, data);
 	init();
 	alert("Training is done, try classifying your handwriting!");
 }
 
+// Script starts from here
+// As soon as the html is loaded, call run()
 document.addEventListener('DOMContentLoaded', run);
 
 
